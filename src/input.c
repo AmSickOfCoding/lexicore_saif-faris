@@ -7,9 +7,17 @@
 
 #include "input.h"
 
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+/* A menu choice is a short number, so a small local buffer is plenty. */
+#define MENU_INPUT_BUFFER_SIZE 64
+
+/* Returned when the user typed something that is not a menu number. */
+#define MENU_CHOICE_INVALID (-1)
 
 /*
  * Reads and throws away the characters left over from a line that was too
@@ -145,4 +153,65 @@ int isBlank(const char *str)
     }
 
     return 1;
+}
+
+/*
+ * Reads one whole line and converts it to a menu number.
+ *
+ * The line is always consumed, whatever it contains, so letters or an
+ * empty line can never leave anything behind in stdin and can never make
+ * the caller's menu loop spin forever. Returns the number the user typed,
+ * or MENU_CHOICE_INVALID (-1) when the line was not a plain number. The
+ * caller prints the prompt and decides whether to ask again.
+ */
+int readMenuChoice(void)
+{
+    char buffer[MENU_INPUT_BUFFER_SIZE] = {0};
+    char *firstUnusedCharacter = NULL;
+    long value = 0;
+
+    /* A failed read means end of input, not a choice. */
+    if (readLine(buffer, sizeof(buffer)) == 0)
+    {
+        return MENU_CHOICE_INVALID;
+    }
+
+    if (isBlank(buffer) == 1)
+    {
+        return MENU_CHOICE_INVALID;
+    }
+
+    /* strtol reports a too-large number by setting errno to ERANGE. */
+    errno = 0;
+    value = strtol(buffer, &firstUnusedCharacter, 10);
+
+    if (errno == ERANGE)
+    {
+        return MENU_CHOICE_INVALID;
+    }
+
+    /* Nothing was converted, so the line started with a letter or sign only. */
+    if (firstUnusedCharacter == buffer)
+    {
+        return MENU_CHOICE_INVALID;
+    }
+
+    /* Trailing spaces are fine; anything else means input like "3x". */
+    while (*firstUnusedCharacter == ' ' || *firstUnusedCharacter == '\t')
+    {
+        firstUnusedCharacter = firstUnusedCharacter + 1;
+    }
+
+    if (*firstUnusedCharacter != '\0')
+    {
+        return MENU_CHOICE_INVALID;
+    }
+
+    /* Menu numbers are small and positive, so reject anything outside that. */
+    if (value < 0 || value > (long)INT_MAX)
+    {
+        return MENU_CHOICE_INVALID;
+    }
+
+    return (int)value;
 }
