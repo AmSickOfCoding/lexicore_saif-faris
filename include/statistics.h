@@ -1,8 +1,6 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
-#include "dictionary.h"
-
-void displayStatistics(const Dictionary *dictionary);
+/* Skeleton header for statistics functions - To be implemented by partner */
 
 #endif
