@@ -350,6 +350,50 @@ static int writeAllEntries(const Dictionary *dictionary, FILE *file,
 }
 
 /*
+ * Asks the user before an existing file is overwritten.
+ *
+ * Returns 1 when saving may go ahead, either because the file is new or
+ * because the user agreed, and 0 when the file must be left alone. If the
+ * answer cannot be read the safe choice is made and nothing is overwritten.
+ */
+static int confirmOverwrite(const char *filename)
+{
+    char answer[ANSWER_BUFFER_SIZE] = {0};
+    FILE *existingFile = NULL;
+
+    if (filename == NULL)
+    {
+        return 0;
+    }
+
+    /* Opening for reading is how this checks whether the file is already there. */
+    existingFile = fopen(filename, "r");
+    if (existingFile == NULL)
+    {
+        /* Nothing exists yet, so there is nothing to overwrite. */
+        return 1;
+    }
+
+    fclose(existingFile);
+
+    printf("Warning: '%s' already exists and will be overwritten.\n", filename);
+    printf("Continue? (y/n): ");
+    fflush(stdout);
+
+    if (readLine(answer, sizeof(answer)) == 0)
+    {
+        return 0;
+    }
+
+    if (answer[0] == 'y' || answer[0] == 'Y')
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
  * Saves the whole dictionary to a file in the pipe-separated format.
  *
  * Returns FILE_OPERATION_SUCCESS when the file was written and closed
@@ -373,6 +417,13 @@ int saveDictionaryToFile(const Dictionary *dictionary, const char *filename)
     if (dictionary->buckets == NULL)
     {
         printf("Error: The dictionary has no bucket array to save.\n");
+        return FILE_OPERATION_FAILURE;
+    }
+
+    /* Ask before destroying a file that is already on disk. */
+    if (confirmOverwrite(filename) == 0)
+    {
+        printf("Save cancelled. '%s' was not changed.\n", filename);
         return FILE_OPERATION_FAILURE;
     }
 
