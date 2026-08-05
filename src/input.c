@@ -7,8 +7,78 @@
 
 #include "input.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
+
+/*
+ * Reads and throws away the characters left over from a line that was too
+ * long to fit in the caller's buffer, up to and including the newline.
+ *
+ * Without this the leftover characters would be picked up by the next
+ * read and would look to the program like a second, bogus line.
+ */
+static void discardRestOfLine(void)
+{
+    int character = 0;
+
+    character = getchar();
+    while (character != '\n' && character != EOF)
+    {
+        character = getchar();
+    }
+}
+
+/*
+ * Reads one line of text from stdin into the caller's buffer.
+ *
+ * Returns 1 on success and 0 on failure (end of file, a read error, or a
+ * buffer the caller did not supply). The buffer belongs to the caller and
+ * is never allocated or freed here. At most bufferSize - 1 characters are
+ * stored, so the buffer can never overflow. The trailing newline is
+ * removed before returning.
+ */
+int readLine(char *buffer, size_t bufferSize)
+{
+    char *readResult = NULL;
+    size_t length = 0;
+
+    /* Never write through the pointer before checking it is usable. */
+    if (buffer == NULL || bufferSize == 0)
+    {
+        return 0;
+    }
+
+    /* Leave the buffer as a valid empty string on every failure path. */
+    buffer[0] = '\0';
+
+    /* fgets takes the size as an int, so refuse an impossibly large size. */
+    if (bufferSize > (size_t)INT_MAX)
+    {
+        return 0;
+    }
+
+    readResult = fgets(buffer, (int)bufferSize, stdin);
+    if (readResult == NULL)
+    {
+        buffer[0] = '\0';
+        return 0;
+    }
+
+    length = strlen(buffer);
+
+    /*
+     * A stored newline means the whole line fitted. If it is missing, the
+     * line was longer than the buffer and the rest must be discarded.
+     */
+    if (length == 0 || buffer[length - 1] != '\n')
+    {
+        discardRestOfLine();
+    }
+
+    trimNewline(buffer);
+    return 1;
+}
 
 /*
  * Removes a trailing newline from a string, in place.
