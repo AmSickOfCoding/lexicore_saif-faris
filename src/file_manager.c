@@ -286,3 +286,123 @@ int loadDictionaryFromFile(Dictionary *dictionary, const char *filename)
 
     return FILE_OPERATION_SUCCESS;
 }
+
+/*
+ * Returns the string itself, or an empty string when it is NULL.
+ *
+ * Passing NULL to printf with %s is undefined behaviour, so every field is
+ * sent through this guard before it is written.
+ */
+static const char *textOrEmpty(const char *text)
+{
+    if (text == NULL)
+    {
+        return "";
+    }
+
+    return text;
+}
+
+/*
+ * Writes every entry in the table to an already open file.
+ *
+ * Returns 1 when all entries were written and 0 on the first write error.
+ * The number written is stored through writtenCount, which the caller owns.
+ */
+static int writeAllEntries(const Dictionary *dictionary, FILE *file,
+                           size_t *writtenCount)
+{
+    DictionaryEntry *current = NULL;
+    size_t bucketIndex = 0;
+    int printResult = 0;
+
+    if (dictionary == NULL || file == NULL || writtenCount == NULL)
+    {
+        return 0;
+    }
+
+    *writtenCount = 0;
+
+    /* Walk every bucket, then every entry chained inside that bucket. */
+    for (bucketIndex = 0; bucketIndex < dictionary->bucketCount; bucketIndex = bucketIndex + 1)
+    {
+        current = dictionary->buckets[bucketIndex];
+        while (current != NULL)
+        {
+            printResult = fprintf(file, "%s|%s|%s|%s\n",
+                                  textOrEmpty(current->word),
+                                  textOrEmpty(current->partOfSpeech),
+                                  textOrEmpty(current->definition),
+                                  textOrEmpty(current->exampleSentence));
+
+            /* A negative result from fprintf means the write failed. */
+            if (printResult < 0)
+            {
+                return 0;
+            }
+
+            *writtenCount = *writtenCount + 1;
+            current = current->next;
+        }
+    }
+
+    return 1;
+}
+
+/*
+ * Saves the whole dictionary to a file in the pipe-separated format.
+ *
+ * Returns FILE_OPERATION_SUCCESS when the file was written and closed
+ * cleanly, and FILE_OPERATION_FAILURE when it was not written. Nothing is
+ * allocated here, so nothing is freed; the dictionary keeps owning all of
+ * its entries and is only read from.
+ */
+int saveDictionaryToFile(const Dictionary *dictionary, const char *filename)
+{
+    FILE *file = NULL;
+    size_t writtenCount = 0;
+    int writeSucceeded = 0;
+
+    /* Check every pointer before it is followed. */
+    if (dictionary == NULL || filename == NULL)
+    {
+        printf("Error: No dictionary or no filename was given.\n");
+        return FILE_OPERATION_FAILURE;
+    }
+
+    if (dictionary->buckets == NULL)
+    {
+        printf("Error: The dictionary has no bucket array to save.\n");
+        return FILE_OPERATION_FAILURE;
+    }
+
+    file = fopen(filename, "w");
+    if (file == NULL)
+    {
+        printf("Error: Could not open '%s' for writing.\n", filename);
+        return FILE_OPERATION_FAILURE;
+    }
+
+    writeSucceeded = writeAllEntries(dictionary, file, &writtenCount);
+    if (writeSucceeded == 0)
+    {
+        printf("Error: Failed while writing to '%s'.\n", filename);
+        fclose(file);
+        return FILE_OPERATION_FAILURE;
+    }
+
+    /*
+     * Closing can still fail because data held in the buffer is written out
+     * at that moment, so the result of fclose is checked as well.
+     */
+    if (fclose(file) != 0)
+    {
+        printf("Error: Failed while closing '%s'. The file may be incomplete.\n", filename);
+        return FILE_OPERATION_FAILURE;
+    }
+
+    printf("Dictionary saved successfully.\n");
+    printf("Entries written: %zu\n", writtenCount);
+
+    return FILE_OPERATION_SUCCESS;
+}
