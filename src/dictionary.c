@@ -5,7 +5,13 @@
 #include "dictionary.h"
 #include "input.h"
 
-/* Case-insensitive string comparison helper using pointer traversal */
+/**
+ * @brief Helper for case-insensitive string comparison using direct pointer arithmetic.
+ * 
+ * @param str1 Pointer to first string.
+ * @param str2 Pointer to second string.
+ * @return int Negative if str1 < str2, positive if str1 > str2, 0 if equal.
+ */
 static int caseInsensitiveCompare(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL)
@@ -32,7 +38,14 @@ static int caseInsensitiveCompare(const char *str1, const char *str2)
     return (int)(tolower((unsigned char)*p1) - tolower((unsigned char)*p2));
 }
 
-/* Safely duplicates a string with memory allocation failure check */
+/**
+ * @brief Safely duplicates a null-terminated string with heap allocation.
+ * 
+ * @param source Pointer to original string to duplicate.
+ * @return char* Dynamically allocated string copy, or NULL on allocation failure/NULL input.
+ * @note Memory Ownership: The caller assumes full ownership of the returned buffer
+ *       and is responsible for deallocating it.
+ */
 char *duplicateString(const char *source)
 {
     if (source == NULL)
@@ -52,7 +65,14 @@ char *duplicateString(const char *source)
     return copy;
 }
 
-/* Allocates and initializes a new dictionary structure and buckets array */
+/**
+ * @brief Allocates and initializes an empty Dictionary hash table structure.
+ * 
+ * @param bucketCount Number of hash table buckets to allocate.
+ * @return Dictionary* Pointer to the newly allocated Dictionary, or NULL on failure.
+ * @note Memory Ownership: Allocates the Dictionary struct and bucket pointer array.
+ *       All bucket array slots are initialized using direct pointer arithmetic.
+ */
 Dictionary *createDictionary(size_t bucketCount)
 {
     if (bucketCount == 0)
@@ -83,7 +103,13 @@ Dictionary *createDictionary(size_t bucketCount)
     return dictionary;
 }
 
-/* Calculates a case-insensitive hash for a word using DJB2 algorithm */
+/**
+ * @brief Computes a case-insensitive DJB2 hash value for a word string.
+ * 
+ * @param word The word string to hash.
+ * @param bucketCount Total bucket count for modulo wrapping.
+ * @return size_t Calculated bucket index in range [0, bucketCount - 1], or 0 on error.
+ */
 size_t hashWord(const char *word, size_t bucketCount)
 {
     if (word == NULL || bucketCount == 0)
@@ -102,7 +128,13 @@ size_t hashWord(const char *word, size_t bucketCount)
     return (size_t)(hash % bucketCount);
 }
 
-/* Frees all dynamic memory associated with the dictionary */
+/**
+ * @brief Deallocates all dynamic memory associated with the Dictionary and its entries.
+ * 
+ * @param dictionary Pointer to the Dictionary instance to destroy.
+ * @note Memory Safety: Safely walks each bucket chain using pointer arithmetic,
+ *       caching the next pointer before freeing all 4 strings and the node to avoid use-after-free.
+ */
 void destroyDictionary(Dictionary *dictionary)
 {
     if (dictionary == NULL)
@@ -117,6 +149,7 @@ void destroyDictionary(Dictionary *dictionary)
             DictionaryEntry *current = *(dictionary->buckets + i);
             while (current != NULL)
             {
+                /* Memory Safety: Cache next pointer before freeing current node */
                 DictionaryEntry *next = current->next;
                 free(current->word);
                 free(current->partOfSpeech);
@@ -132,7 +165,14 @@ void destroyDictionary(Dictionary *dictionary)
     free(dictionary);
 }
 
-/* Finds a word in the dictionary (case-insensitive) by walking the target bucket with pointer arithmetic */
+/**
+ * @brief Finds a word entry within the dictionary using case-insensitive lookup.
+ * 
+ * @param dictionary Const pointer to the Dictionary instance.
+ * @param word The word to find.
+ * @return DictionaryEntry* Pointer to matching node, or NULL if not found / invalid input.
+ * @note Scoped Lookup: Traverses only the target bucket chain via direct pointer arithmetic.
+ */
 DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
 {
     if (dictionary == NULL || word == NULL || dictionary->buckets == NULL || dictionary->bucketCount == 0)
@@ -155,13 +195,22 @@ DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
     return NULL;
 }
 
-/*
- * Adds a new word entry into the dictionary.
- * Rejects empty fields and duplicate words.
- * Returns:
- *   1  : Success
- *  -1  : Memory allocation failure or invalid argument
- *  -2  : Duplicate word
+/**
+ * @brief Inserts a new word entry and its metadata into the dictionary.
+ * 
+ * @param dictionary Pointer to the target Dictionary.
+ * @param word Word string (must not be empty or blank).
+ * @param partOfSpeech Part of speech classification (noun, verb, etc.).
+ * @param definition Text definition of the word.
+ * @param exampleSentence Example usage sentence.
+ * 
+ * @retval  1 Successfully added entry.
+ * @retval -1 Memory allocation failure or invalid/empty argument.
+ * @retval -2 Duplicate word already exists in the dictionary.
+ * 
+ * @note Memory Ownership & Rollback: Allocates dynamic copies of all four strings.
+ *       If any string allocation fails midway, all allocated strings and the node are
+ *       freed immediately to guarantee zero memory leakage.
  */
 int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
             const char *definition, const char *exampleSentence)
@@ -194,7 +243,7 @@ int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
     newEntry->definition = duplicateString(definition);
     newEntry->exampleSentence = duplicateString(exampleSentence);
 
-    /* Rollback memory if any string allocation failed */
+    /* Memory Safety: Rollback and release memory if any string allocation failed */
     if (newEntry->word == NULL || newEntry->partOfSpeech == NULL ||
         newEntry->definition == NULL || newEntry->exampleSentence == NULL)
     {
@@ -206,6 +255,7 @@ int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
         return -1;
     }
 
+    /* Insert at head of the bucket chain using direct pointer arithmetic */
     size_t index = hashWord(word, dictionary->bucketCount);
     newEntry->next = *(dictionary->buckets + index);
     *(dictionary->buckets + index) = newEntry;
@@ -214,13 +264,19 @@ int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
     return 1;
 }
 
-/*
- * Updates a word's metadata. Safely allocates the new string before
- * freeing the existing one to protect against allocation failures.
- * Returns:
- *   1  : Success
- *   0  : Word not found or update cancelled
- *  -1  : Memory allocation failure or invalid input
+/**
+ * @brief Interactively prompts to update a specific field of an existing dictionary entry.
+ * 
+ * @param dictionary Pointer to the target Dictionary.
+ * @param word Word string to locate and update.
+ * 
+ * @retval  1 Successfully updated field.
+ * @retval  0 Word not found or update cancelled by user.
+ * @retval -1 Memory allocation failure or invalid input.
+ * 
+ * @note Memory Safety (Allocate-Before-Free): The new string is allocated and verified
+ *       BEFORE the existing field is freed. This ensures existing data is never corrupted
+ *       or lost if memory allocation fails.
  */
 int updateWord(Dictionary *dictionary, const char *word)
 {
@@ -265,7 +321,7 @@ int updateWord(Dictionary *dictionary, const char *word)
         return -1;
     }
 
-    /* Allocate new string BEFORE freeing old one to safeguard existing data */
+    /* Memory Safety: Allocate new string BEFORE freeing old one to safeguard existing data */
     char *newVal = duplicateString(inputBuffer);
     if (newVal == NULL)
     {
@@ -296,13 +352,18 @@ int updateWord(Dictionary *dictionary, const char *word)
     return 1;
 }
 
-/*
- * Deletes a word from the dictionary. Handles first, middle, or last node removal
- * from the chain, confirms with the user, and safely frees all dynamic memory.
- * Returns:
- *   1  : Deleted successfully
- *   0  : Word not found or deletion cancelled
- *  -1  : Invalid parameter
+/**
+ * @brief Removes a word entry from the dictionary and deallocates all associated memory.
+ * 
+ * @param dictionary Pointer to the target Dictionary.
+ * @param word The word string to delete.
+ * 
+ * @retval  1 Successfully deleted.
+ * @retval  0 Word not found or user cancelled deletion at prompt.
+ * @retval -1 Invalid parameter.
+ * 
+ * @note Node Unlinking: Unlinks node from chain (head, middle, or tail) via pointer arithmetic,
+ *       prompts for confirmation, frees all 4 dynamic strings + node struct, and decrements entryCount.
  */
 int deleteWord(Dictionary *dictionary, const char *word)
 {
@@ -342,7 +403,7 @@ int deleteWord(Dictionary *dictionary, const char *word)
         return 0;
     }
 
-    /* Unlink node from chain */
+    /* Unlink node from bucket chain */
     if (prev == NULL)
     {
         *(dictionary->buckets + index) = current->next;
