@@ -295,3 +295,75 @@ int updateWord(Dictionary *dictionary, const char *word)
     printf("Word '%s' updated successfully.\n", entry->word);
     return 1;
 }
+
+/*
+ * Deletes a word from the dictionary. Handles first, middle, or last node removal
+ * from the chain, confirms with the user, and safely frees all dynamic memory.
+ * Returns:
+ *   1  : Deleted successfully
+ *   0  : Word not found or deletion cancelled
+ *  -1  : Invalid parameter
+ */
+int deleteWord(Dictionary *dictionary, const char *word)
+{
+    if (dictionary == NULL || word == NULL || dictionary->buckets == NULL || dictionary->bucketCount == 0)
+    {
+        printf("Error: Invalid dictionary or word parameter.\n");
+        return -1;
+    }
+
+    size_t index = hashWord(word, dictionary->bucketCount);
+    DictionaryEntry *current = dictionary->buckets[index];
+    DictionaryEntry *prev = NULL;
+
+    while (current != NULL)
+    {
+        if (current->word != NULL && caseInsensitiveCompare(current->word, word) == 0)
+        {
+            break;
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    if (current == NULL)
+    {
+        printf("Word '%s' not found in dictionary.\n", word);
+        return 0;
+    }
+
+    /* Confirmation prompt */
+    char confirmBuffer[16] = {0};
+    printf("Are you sure you want to delete '%s'? (y/n): ", current->word);
+    if (!readLine(confirmBuffer, sizeof(confirmBuffer)) ||
+        (tolower((unsigned char)confirmBuffer[0]) != 'y'))
+    {
+        printf("Deletion cancelled.\n");
+        return 0;
+    }
+
+    /* Unlink node from chain */
+    if (prev == NULL)
+    {
+        dictionary->buckets[index] = current->next;
+    }
+    else
+    {
+        prev->next = current->next;
+    }
+
+    /* Free all dynamically allocated strings and the entry struct */
+    free(current->word);
+    free(current->partOfSpeech);
+    free(current->definition);
+    free(current->exampleSentence);
+    free(current);
+
+    if (dictionary->entryCount > 0)
+    {
+        dictionary->entryCount--;
+    }
+
+    printf("Word '%s' deleted successfully.\n", word);
+    return 1;
+}
