@@ -1,5 +1,7 @@
 # LexiCore
-**Trainees:** <saif>, <faris>
+**Trainees:** Saif (Trainee A), Faris (Trainee B)
+
+A command line dictionary in C11, built on a hash table with separate chaining.
 
 ## Description and features
 
@@ -294,5 +296,79 @@ Goodbye.
 ```
 
 ## Memory management
+
+The rule the whole program follows is that **every piece of memory has exactly
+one owner, and only the owner frees it.**
+
+**The dictionary owns the entries.** `addWord` allocates a `DictionaryEntry` and
+its own copy of all four strings. From then on those seven blocks belong to the
+dictionary. Anything else that holds a `DictionaryEntry *` is only borrowing it.
+
+**One create, one destroy.** `main` calls `createDictionary` once at startup and
+`destroyDictionary` once on the way out, and that second call is reached on
+every path that leaves the menu. `destroyDictionary` walks each chain, caching
+`current->next` before freeing `current`, and frees the four strings, then the
+node, then the bucket array, then the struct itself.
+
+**Borrowed pointers are never freed.** `findWord` hands back a pointer to an
+entry the dictionary still owns, so the menu prints it and forgets it.
+`displayDictionaryAlphabetically` allocates one temporary array of
+`DictionaryEntry *`, fills it with borrowed pointers, sorts that array, prints
+it and frees it. It deliberately does not copy the entries: copying would mean
+duplicating four strings per word and would leave two owners for text only the
+dictionary may free. That array is freed on every exit path, including the early
+returns for an empty dictionary and a failed allocation.
+
+**Allocation failure is always checked.** Every `malloc` is tested for `NULL`
+before the result is used. `addWord` rolls back: if any of the four string
+copies fails, everything already allocated for that entry is freed and the entry
+is never linked into a chain. `updateWord` allocates the replacement string
+*before* freeing the old one, so a failed allocation leaves the existing entry
+untouched rather than empty.
+
+**Nothing else allocates at all.** The input helpers, the loader, the saver, the
+statistics report and the prefix search work entirely in buffers the caller
+already owns, usually a local array on the stack. That is why the text typed at
+a menu prompt never needs freeing: `addWord` copies it, and the buffer
+disappears when the function returns.
+
 ## Known limitations
+
+- **The table never grows.** The bucket count is fixed at 503 when the program
+  starts. Adding far more than a few hundred words lengthens the chains and
+  slowly turns lookups into linear searches, because there is no rehashing.
+- **Prefix results are not sorted.** They come out in the order the buckets are
+  walked, so `str` lists `strict` before `stream`. Only the alphabetical listing
+  in option 6 is sorted.
+- **Saving reorders the file.** Entries are written bucket by bucket, so a file
+  saved by the program is no longer in the order it was typed in.
+- **No `|` in any field**, because that character separates the fields. There is
+  no escape sequence for it.
+- **Lines are capped at 4096 characters** when loading. A longer line is
+  rejected rather than truncated.
+- **Loading merges, it does not replace.** Option 8 adds to what is already in
+  memory and skips words that are already there. There is no way to empty the
+  dictionary from the menu; restarting the program is the way to do that.
+- **A word cannot be renamed.** Option 3 changes the part of speech, the
+  definition or the example sentence. Changing the spelling of the word itself
+  means deleting it and adding it again, because the word decides its bucket.
+- **ASCII only.** Case-insensitive matching goes through `tolower`, which knows
+  about `a` to `z`. Accented letters are compared as-is, so `Café` and `café`
+  match but `cafe` is a different word.
+- **One file, one user.** There is no locking, and nothing detects that a
+  dictionary file changed on disk while the program was running.
+- **Deleting is final.** There is no undo once the confirmation is answered.
+
 ## Contributions
+
+Written by two trainees. `CONTRIBUTIONS.md` has the full breakdown; in short:
+
+- **Saif (Trainee A)** wrote the hash table core in `src/dictionary.c`: the
+  string and table setup, the DJB2 hash, `findWord`, `addWord`, `updateWord`,
+  `deleteWord` and `destroyDictionary`, plus `docs/design.md`.
+- **Faris (Trainee B)** wrote the input helpers, the file loader and saver, the
+  statistics report, the prefix search and alphabetical listing, the menu loop
+  in `src/main.c`, the data files, `tests/test_cases.md` and this README.
+- **Together** we agreed the hash table design and separate chaining, the pipe
+  separated file format, the module interfaces and return code conventions in
+  `include/`, and reviewed each other's code.
