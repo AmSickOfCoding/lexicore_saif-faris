@@ -132,7 +132,13 @@ void destroyDictionary(Dictionary *dictionary)
     free(dictionary);
 }
 
-/* Finds a word in the dictionary (case-insensitive) by walking the target bucket with pointer arithmetic */
+/**
+ * Finds a word in the dictionary (case-insensitive) by walking the target bucket chain.
+ * 
+ * Algorithmic Complexity:
+ * - Time Complexity: O(1) average case lookup; O(N) worst-case under extreme bucket collision.
+ * - Space Complexity: O(1) auxiliary space (direct pointer traversal).
+ */
 DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
 {
     if (dictionary == NULL || word == NULL || dictionary->buckets == NULL || dictionary->bucketCount == 0)
@@ -155,9 +161,14 @@ DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
     return NULL;
 }
 
-/*
+/**
  * Adds a new word entry into the dictionary.
  * Rejects empty fields and duplicate words.
+ * 
+ * Algorithmic Complexity:
+ * - Time Complexity: O(1) average case insertion prepending to chain; O(1) hash lookup.
+ * - Space Complexity: O(K) where K is the length of strings allocated dynamically.
+ * 
  * Returns:
  *   1  : Success
  *  -1  : Memory allocation failure or invalid argument
