@@ -187,6 +187,112 @@ so the loader can be tested against all of them. `tests/test_cases.md` explains
 what each line is for.
 
 ## Example usage
+
+Starting the program loads the dictionary and shows the menu:
+
+```
+Welcome to LexiCore.
+
+Loading 'data/dictionary.txt'...
+Dictionary loaded successfully.
+Valid entries loaded: 67
+Invalid lines ignored: 0
+Duplicate words ignored: 0
+
+========== LexiCore Dictionary ==========
+1.  Search for a word
+2.  Add a new word
+3.  Edit an existing word
+4.  Delete a word
+5.  Search by prefix
+6.  Display all words alphabetically
+7.  Display statistics
+8.  Load dictionary from file
+9.  Save dictionary to file
+10. Help
+0.  Exit
+=========================================
+Enter your choice: 1
+Enter the word to search for: program
+
+Word:            program
+Part of speech:  noun
+Definition:      A set of instructions that tells a computer what to do.
+Example:         She wrote a program to sort the results.
+```
+
+Searching by prefix walks the whole table, so words that share a prefix are
+found even though they sit in different buckets:
+
+```
+Enter your choice: 5
+Enter prefix: str
+
+1. strict
+2. stream
+3. strength
+4. structure
+5. stretch
+6. stroll
+7. strong
+8. strictly
+
+8 matching words found.
+```
+
+The statistics option reports on the table itself:
+
+```
+Enter your choice: 7
+========== Dictionary Statistics ==========
+Total entries:                   67
+Total buckets:                  503
+Used buckets:                    62
+Empty buckets:                  441
+Load factor:                   0.13
+Longest chain:                    3
+Average used-chain length:     1.08
+
+Words by part of speech:
+  noun:         20
+  verb:         24
+  adjective:    14
+  adverb:        9
+  other:         0
+===========================================
+```
+
+Adding a word asks for each field in turn, and refuses a word that is already
+there:
+
+```
+Enter your choice: 2
+Enter the new word: lattice
+Enter its part of speech: noun
+Enter its definition: A frame of crossed strips of wood.
+Enter an example sentence: Roses grew up the wooden lattice.
+'lattice' was added to the dictionary.
+
+Enter your choice: 2
+Enter the new word: program
+Enter its part of speech: noun
+Enter its definition: Something else.
+Enter an example sentence: Another sentence.
+'program' is already in the dictionary. Nothing was added.
+```
+
+Leaving the program offers to save first, but only if something has changed:
+
+```
+Enter your choice: 0
+Save changes before exiting? (y/n): y
+Warning: 'data/dictionary.txt' already exists and will be overwritten.
+Continue? (y/n): y
+Dictionary saved successfully.
+Entries written: 68
+Goodbye.
+```
+
 ## Memory management
 ## Known limitations
 ## Contributions
