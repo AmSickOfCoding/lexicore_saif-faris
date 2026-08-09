@@ -126,8 +126,6 @@ size_t findWordsByPrefix(const Dictionary *dictionary, const char *prefix)
         return 0;
     }
 
-    printf("\n");
-
     /* Walk every bucket, because a prefix does not hash to a single one. */
     for (bucketIndex = 0; bucketIndex < dictionary->bucketCount; bucketIndex = bucketIndex + 1)
     {
@@ -138,6 +136,13 @@ size_t findWordsByPrefix(const Dictionary *dictionary, const char *prefix)
             if (startsWithIgnoreCase(current->word, prefix) == 1)
             {
                 matchCount = matchCount + 1;
+
+                /* Open the list with a blank line, but only once it exists. */
+                if (matchCount == 1)
+                {
+                    printf("\n");
+                }
+
                 printf("%zu. %s\n", matchCount, textOrPlaceholder(current->word));
             }
 
