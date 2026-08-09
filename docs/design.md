@@ -45,3 +45,41 @@ To guarantee zero memory leaks and eliminate dangling pointer dereferences:
 4. Free the `DictionaryEntry` node.
 5. Free the `buckets` pointer array.
 6. Free the `Dictionary` structure.
+
+---
+
+## 3. Documented Git Merge Conflict Exercise
+
+### Conflict Background
+During simultaneous development on the core architecture and file loading subsystems:
+* **Branch A (Trainee A):** Implemented core CRUD signatures and strict pointer arithmetic constraints in `docs/design.md`.
+* **Branch B (Trainee B):** Implemented file loader architecture, streaming pipeline, and statistical metric specifications in `docs/design.md`.
+
+Both branches modified adjacent sections of `docs/design.md` simultaneously, resulting in a merge conflict upon integrating feature branches into `main`.
+
+### Conflict Breakdown
+
+#### HEAD (Branch A - Trainee A)
+```markdown
+<<<<<<< HEAD
+### Core Operations & Pointer Rules
+- Direct pointer arithmetic enforced across all bucket traversals.
+- Distinct return codes: 1 (Success), -1 (Allocation Error), -2 (Duplicate).
+=======
+```
+
+#### Incoming Branch (Branch B - Trainee B)
+```markdown
+### Storage & File Pipeline
+- Multi-pipe parser `word|pos|def|example` with non-blocking error recovery.
+- Real-time statistics aggregation: load factor, chain length, and POS distribution.
+>>>>>>> origin/feature-file-loading
+```
+
+### Resolution Procedure
+1. **Analysis:** Neither version was discarded. Both feature sets were valid and required for complete system documentation.
+2. **Synthesis:** Merged both sections logically under appropriate architecture headings:
+   * Section 1: Hash table and pointer arithmetic rules (Trainee A).
+   * Section 2: File loader pipeline and statistics tracking (Trainee B).
+3. **Marker Cleanup:** Explicitly removed all Git conflict delimiters (`<<<<<<< HEAD`, `=======`, and `>>>>>>> origin/...`).
+4. **Validation:** Confirmed clean markdown formatting and committed the unified resolution to `main`.
