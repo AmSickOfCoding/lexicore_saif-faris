@@ -154,3 +154,62 @@ DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
 
     return NULL;
 }
+
+/*
+ * Adds a new word entry into the dictionary.
+ * Rejects empty fields and duplicate words.
+ * Returns:
+ *   1  : Success
+ *  -1  : Memory allocation failure or invalid argument
+ *  -2  : Duplicate word
+ */
+int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
+            const char *definition, const char *exampleSentence)
+{
+    if (dictionary == NULL || word == NULL || partOfSpeech == NULL ||
+        definition == NULL || exampleSentence == NULL)
+    {
+        return -1;
+    }
+
+    if (isBlank(word) || isBlank(partOfSpeech) || isBlank(definition) || isBlank(exampleSentence))
+    {
+        return -1;
+    }
+
+    /* Reject duplicate words (case-insensitive check) */
+    if (findWord(dictionary, word) != NULL)
+    {
+        return -2;
+    }
+
+    DictionaryEntry *newEntry = malloc(sizeof(DictionaryEntry));
+    if (newEntry == NULL)
+    {
+        return -1;
+    }
+
+    newEntry->word = duplicateString(word);
+    newEntry->partOfSpeech = duplicateString(partOfSpeech);
+    newEntry->definition = duplicateString(definition);
+    newEntry->exampleSentence = duplicateString(exampleSentence);
+
+    /* Rollback memory if any string allocation failed */
+    if (newEntry->word == NULL || newEntry->partOfSpeech == NULL ||
+        newEntry->definition == NULL || newEntry->exampleSentence == NULL)
+    {
+        free(newEntry->word);
+        free(newEntry->partOfSpeech);
+        free(newEntry->definition);
+        free(newEntry->exampleSentence);
+        free(newEntry);
+        return -1;
+    }
+
+    size_t index = hashWord(word, dictionary->bucketCount);
+    newEntry->next = dictionary->buckets[index];
+    dictionary->buckets[index] = newEntry;
+
+    dictionary->entryCount++;
+    return 1;
+}
