@@ -99,8 +99,93 @@ How well it spreads the shipped data, as reported by menu option 7:
 | Average chain length, counting used buckets only | 1.08 |
 
 ## Folder structure
+
+```
+lexicore_saif-faris/
+├── include/                  Public headers, one per module
+│   ├── dictionary.h            Dictionary and DictionaryEntry types, table operations
+│   ├── file_manager.h          Loading and saving
+│   ├── input.h                 Safe console input helpers
+│   └── statistics.h            The statistics report
+├── src/
+│   ├── dictionary.c            Hash table core: create, hash, find, add, update, delete, destroy
+│   ├── file_manager.c          Reads and writes the pipe separated file format
+│   ├── input.c                 readLine, trimNewline, isBlank, readMenuChoice
+│   ├── main.c                  The menu loop that drives everything else
+│   ├── search_display.c        Prefix search and the alphabetical listing
+│   └── statistics.c            Counts and prints the table statistics
+├── data/
+│   ├── dictionary.txt          67 real entries, loaded at startup
+│   └── test_dictionary.txt     A deliberately broken file for testing the loader
+├── docs/
+│   └── design.md               Architecture and memory strategy notes
+├── tests/
+│   └── test_cases.md           Manual test cases with expected results
+├── CONTRIBUTIONS.md          Who wrote what
+├── Makefile
+└── README.md
+```
+
 ## Compilation and running
+
+You need `gcc` and `make`. Nothing else is required; the program uses only the
+C standard library.
+
+```
+make            # build ./lexicore
+make run        # build, then run it
+make clean      # delete the binary
+```
+
+The build uses:
+
+```
+gcc -Wall -Wextra -Wpedantic -std=c11 -Iinclude
+```
+
+It compiles with **no warnings** under those flags. Run the program from the
+project root, because it looks for `data/dictionary.txt` relative to the current
+directory:
+
+```
+./lexicore
+```
+
+If that file is missing the program says so and starts with an empty dictionary
+rather than exiting.
+
 ## Dictionary file format
+
+One entry per line, four fields, separated by the pipe character `|`:
+
+```
+word|part of speech|definition|example sentence
+```
+
+For example:
+
+```
+program|noun|A set of instructions that tells a computer what to do.|She wrote a program to sort the results.
+strictly|adverb|In a way that must be obeyed exactly.|Smoking is strictly forbidden inside the building.
+```
+
+Rules the loader follows:
+
+- Spaces around a field are trimmed, so `  ivory  |  noun  | ...` is accepted.
+- A blank line, or a line of only spaces and tabs, is skipped in silence.
+- A line without exactly four fields is reported and ignored, and reading
+  continues with the next line.
+- A field left empty makes the whole line invalid.
+- A word already in the table is ignored, and the definition already stored is
+  kept.
+- A line longer than 4096 characters is rejected, and the rest of it is thrown
+  away rather than being read as a second line.
+- No field may contain a `|`, since that is the separator itself.
+
+`data/test_dictionary.txt` breaks each of these rules on purpose, one per line,
+so the loader can be tested against all of them. `tests/test_cases.md` explains
+what each line is for.
+
 ## Example usage
 ## Memory management
 ## Known limitations
