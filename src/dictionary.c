@@ -75,7 +75,7 @@ Dictionary *createDictionary(size_t bucketCount)
 
     for (size_t i = 0; i < bucketCount; i++)
     {
-        dictionary->buckets[i] = NULL;
+        *(dictionary->buckets + i) = NULL;
     }
 
     dictionary->bucketCount = bucketCount;
@@ -114,7 +114,7 @@ void destroyDictionary(Dictionary *dictionary)
     {
         for (size_t i = 0; i < dictionary->bucketCount; i++)
         {
-            DictionaryEntry *current = dictionary->buckets[i];
+            DictionaryEntry *current = *(dictionary->buckets + i);
             while (current != NULL)
             {
                 DictionaryEntry *next = current->next;
@@ -132,7 +132,7 @@ void destroyDictionary(Dictionary *dictionary)
     free(dictionary);
 }
 
-/* Finds a word in the dictionary (case-insensitive) by walking the target bucket */
+/* Finds a word in the dictionary (case-insensitive) by walking the target bucket with pointer arithmetic */
 DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
 {
     if (dictionary == NULL || word == NULL || dictionary->buckets == NULL || dictionary->bucketCount == 0)
@@ -141,7 +141,7 @@ DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
     }
 
     size_t index = hashWord(word, dictionary->bucketCount);
-    DictionaryEntry *current = dictionary->buckets[index];
+    DictionaryEntry *current = *(dictionary->buckets + index);
 
     while (current != NULL)
     {
@@ -207,8 +207,8 @@ int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
     }
 
     size_t index = hashWord(word, dictionary->bucketCount);
-    newEntry->next = dictionary->buckets[index];
-    dictionary->buckets[index] = newEntry;
+    newEntry->next = *(dictionary->buckets + index);
+    *(dictionary->buckets + index) = newEntry;
 
     dictionary->entryCount++;
     return 1;
@@ -313,7 +313,7 @@ int deleteWord(Dictionary *dictionary, const char *word)
     }
 
     size_t index = hashWord(word, dictionary->bucketCount);
-    DictionaryEntry *current = dictionary->buckets[index];
+    DictionaryEntry *current = *(dictionary->buckets + index);
     DictionaryEntry *prev = NULL;
 
     while (current != NULL)
@@ -345,7 +345,7 @@ int deleteWord(Dictionary *dictionary, const char *word)
     /* Unlink node from chain */
     if (prev == NULL)
     {
-        dictionary->buckets[index] = current->next;
+        *(dictionary->buckets + index) = current->next;
     }
     else
     {
