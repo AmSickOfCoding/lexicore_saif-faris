@@ -1,0 +1,40 @@
+combine|verb|To join two or more things together so they form one thing.|We combine the flour and the eggs before adding the milk.
+comfort|noun|A feeling of ease and freedom from worry or pain.|The warm blanket was a comfort on the cold night.
+commit|verb|To promise your time or effort to something.|He decided to commit two evenings a week to the project.
+common|adjective|Happening often or found in many places.|Heavy rain is common here in the autumn.
+compare|verb|To look at two things to see how they are alike or different.|Compare the two designs before you choose one.
+complete|adjective|Having every part that is needed, with nothing missing.|The set is complete now that the last piece has arrived.
+completely|adverb|In every way, with nothing left out.|The room went completely dark when the power failed.
+compute|verb|To work out an amount or an answer using numbers.|The program will compute the total cost of each order.
+conclude|verb|To decide something after thinking about the facts.|We can conclude from these results that the change worked.
+concern|noun|A feeling of worry about something important.|Her main concern was the safety of the students.
+confident|adjective|Sure that you are able to do something well.|She felt confident as she walked into the interview.
+connect|verb|To join one thing to another so that they work together.|Connect the printer to the computer with this cable.
+console|verb|To comfort someone who is sad or disappointed.|He tried to console his friend after the bad news.
+constant|adjective|Staying the same, or happening all the time.|The engine runs best at a constant speed.
+constantly|adverb|All the time, without stopping.|The phone rang constantly all morning.
+contain|verb|To hold something inside.|Each box can contain up to twenty books.
+process|verb|To deal with something through a series of steps.|The office will process your application this week.
+processor|noun|The part of a computer that carries out instructions.|This laptop has a faster processor than the old one.
+program|noun|A set of instructions that tells a computer what to do.|She wrote a program to sort the results.
+progress|noun|Movement forward towards a goal.|The builders made good progress during the dry weather.
+prolong|verb|To make something last longer than it otherwise would.|Regular servicing will prolong the life of the machine.
+prompt|adjective|Done quickly and without delay.|Thank you for your prompt reply to my letter.
+promptly|adverb|Without any delay.|She answered every message promptly.
+protect|verb|To keep someone or something safe from harm.|A helmet will protect your head if you fall.
+recently|adverb|At a time not long ago.|We recently moved into a smaller office.
+record|noun|A written note of something kept so it can be checked later.|The nurse kept a record of every visit.
+reduce|verb|To make something smaller in size or amount.|Turning off the lights will reduce the bill.
+reliable|adjective|Able to be trusted to work or behave as expected.|The old van is still reliable in bad weather.
+remember|verb|To keep something in your mind and be able to think of it again.|I cannot remember where I left my keys.
+restore|verb|To bring something back to the state it was in before.|They plan to restore the old station building.
+retreat|noun|A quiet place where someone can rest away from others.|The cabin by the lake was his weekend retreat.
+reveal|verb|To make known something that was hidden.|He would not reveal the name of the winner.
+stream|noun|A small narrow river.|The children waded across the shallow stream.
+strength|noun|The quality of being physically strong.|She slowly built up her strength after the illness.
+stretch|verb|To make something longer or wider by pulling it.|Stretch the canvas tightly over the frame.
+strict|adjective|Expecting rules to be obeyed exactly.|Our teacher is strict about handing work in on time.
+strictly|adverb|In a way that must be obeyed exactly.|Smoking is strictly forbidden inside the building.
+stroll|verb|To walk in a slow and relaxed way.|They like to stroll along the river after dinner.
+strong|adjective|Having a lot of power or force.|A strong wind blew the garden fence over.
+structure|noun|The way the parts of something are put together.|The bridge has a simple steel structure.
