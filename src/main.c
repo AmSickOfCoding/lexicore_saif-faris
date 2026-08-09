@@ -510,6 +510,18 @@ int main(void)
         printMenu();
         choice = readMenuChoice();
 
+        /*
+         * Running out of input looks the same as a wrong answer, so it is
+         * checked first. Otherwise a redirected file that simply ran out
+         * would be told off for typing something invalid.
+         */
+        if (choice == MENU_CHOICE_INVALID && inputIsFinished() == 1)
+        {
+            printf("\nInput has ended. Leaving the menu.\n");
+            running = 0;
+            continue;
+        }
+
         switch (choice)
         {
             case MENU_SEARCH:
