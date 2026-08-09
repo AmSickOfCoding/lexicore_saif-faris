@@ -3,6 +3,34 @@
 #include <string.h>
 #include <ctype.h>
 #include "dictionary.h"
+#include "input.h"
+
+/* Case-insensitive string comparison helper using pointer traversal */
+static int caseInsensitiveCompare(const char *str1, const char *str2)
+{
+    if (str1 == NULL || str2 == NULL)
+    {
+        return (str1 == str2) ? 0 : (str1 == NULL ? -1 : 1);
+    }
+
+    const char *p1 = str1;
+    const char *p2 = str2;
+
+    while (*p1 != '\0' && *p2 != '\0')
+    {
+        int c1 = tolower((unsigned char)*p1);
+        int c2 = tolower((unsigned char)*p2);
+
+        if (c1 != c2)
+        {
+            return c1 - c2;
+        }
+        p1++;
+        p2++;
+    }
+
+    return (int)(tolower((unsigned char)*p1) - tolower((unsigned char)*p2));
+}
 
 /* Safely duplicates a string with memory allocation failure check */
 char *duplicateString(const char *source)
@@ -102,4 +130,27 @@ void destroyDictionary(Dictionary *dictionary)
     }
 
     free(dictionary);
+}
+
+/* Finds a word in the dictionary (case-insensitive) by walking the target bucket */
+DictionaryEntry *findWord(const Dictionary *dictionary, const char *word)
+{
+    if (dictionary == NULL || word == NULL || dictionary->buckets == NULL || dictionary->bucketCount == 0)
+    {
+        return NULL;
+    }
+
+    size_t index = hashWord(word, dictionary->bucketCount);
+    DictionaryEntry *current = dictionary->buckets[index];
+
+    while (current != NULL)
+    {
+        if (current->word != NULL && caseInsensitiveCompare(current->word, word) == 0)
+        {
+            return current;
+        }
+        current = current->next;
+    }
+
+    return NULL;
 }
