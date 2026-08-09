@@ -45,6 +45,17 @@
 /* One word or one prefix, with plenty of room to spare. */
 #define WORD_BUFFER_SIZE 256
 
+/* A definition or an example sentence, which can be a long line. */
+#define TEXT_BUFFER_SIZE 1024
+
+/* The three results addWord can give back. */
+#define ADD_WORD_SUCCESS 1
+#define ADD_WORD_ERROR (-1)
+#define ADD_WORD_DUPLICATE (-2)
+
+/* updateWord and deleteWord both return this when they changed something. */
+#define WORD_CHANGED 1
+
 /*
  * Returns 1 once stdin has nothing left to give.
  *
@@ -232,6 +243,122 @@ static void handleSearch(const Dictionary *dictionary)
 }
 
 /*
+ * Menu option 2: asks for all four fields and adds the word.
+ *
+ * Returns 1 when the dictionary changed and 0 when it did not, so the menu
+ * knows whether there is anything to save. The four buffers live on the
+ * stack; addWord makes its own copies of the text, so nothing typed here
+ * ever needs freeing and the buffers simply disappear on return.
+ */
+static int handleAdd(Dictionary *dictionary)
+{
+    char word[WORD_BUFFER_SIZE] = {0};
+    char partOfSpeech[WORD_BUFFER_SIZE] = {0};
+    char definition[TEXT_BUFFER_SIZE] = {0};
+    char exampleSentence[TEXT_BUFFER_SIZE] = {0};
+    int result = 0;
+
+    /* Every field is checked here so no empty text reaches addWord. */
+    if (promptForText("Enter the new word: ", word, sizeof(word)) == 0)
+    {
+        return 0;
+    }
+
+    if (promptForText("Enter its part of speech: ", partOfSpeech, sizeof(partOfSpeech)) == 0)
+    {
+        return 0;
+    }
+
+    if (promptForText("Enter its definition: ", definition, sizeof(definition)) == 0)
+    {
+        return 0;
+    }
+
+    if (promptForText("Enter an example sentence: ", exampleSentence, sizeof(exampleSentence)) == 0)
+    {
+        return 0;
+    }
+
+    result = addWord(dictionary, word, partOfSpeech, definition, exampleSentence);
+
+    if (result == ADD_WORD_SUCCESS)
+    {
+        printf("'%s' was added to the dictionary.\n", word);
+        return 1;
+    }
+
+    if (result == ADD_WORD_DUPLICATE)
+    {
+        printf("'%s' is already in the dictionary. Nothing was added.\n", word);
+        return 0;
+    }
+
+    if (result == ADD_WORD_ERROR)
+    {
+        printf("Error: '%s' could not be added. A field may be empty or there\n", word);
+        printf("was not enough memory. Nothing was changed.\n");
+        return 0;
+    }
+
+    /* An unknown result is still reported rather than passing silently. */
+    printf("Error: '%s' could not be added (unexpected result %d).\n", word, result);
+    return 0;
+}
+
+/*
+ * Menu option 3: asks which word to edit and hands over to updateWord.
+ *
+ * updateWord asks which field to change and prints its own messages, so the
+ * only job left here is to say whether the dictionary changed. Returns 1
+ * when it did. Nothing is allocated or freed in this function.
+ */
+static int handleEdit(Dictionary *dictionary)
+{
+    char word[WORD_BUFFER_SIZE] = {0};
+    int result = 0;
+
+    if (promptForText("Enter the word to edit: ", word, sizeof(word)) == 0)
+    {
+        return 0;
+    }
+
+    result = updateWord(dictionary, word);
+    if (result == WORD_CHANGED)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+ * Menu option 4: asks which word to delete and hands over to deleteWord.
+ *
+ * deleteWord asks the user to confirm, frees the entry itself, and prints
+ * its own messages. Returns 1 here when a word was really removed. The
+ * entry is freed inside deleteWord, so nothing in this file may touch it
+ * afterwards.
+ */
+static int handleDelete(Dictionary *dictionary)
+{
+    char word[WORD_BUFFER_SIZE] = {0};
+    int result = 0;
+
+    if (promptForText("Enter the word to delete: ", word, sizeof(word)) == 0)
+    {
+        return 0;
+    }
+
+    result = deleteWord(dictionary, word);
+    if (result == WORD_CHANGED)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
  * Menu option 5: lists every word starting with the letters the user types.
  *
  * findWordsByPrefix prints the matches and the total itself, so there is
@@ -295,6 +422,28 @@ int main(void)
         {
             case MENU_SEARCH:
                 handleSearch(dictionary);
+                break;
+
+            /* Each of these three reports whether anything really changed. */
+            case MENU_ADD:
+                if (handleAdd(dictionary) == 1)
+                {
+                    modified = 1;
+                }
+                break;
+
+            case MENU_EDIT:
+                if (handleEdit(dictionary) == 1)
+                {
+                    modified = 1;
+                }
+                break;
+
+            case MENU_DELETE:
+                if (handleDelete(dictionary) == 1)
+                {
+                    modified = 1;
+                }
                 break;
 
             case MENU_PREFIX:
