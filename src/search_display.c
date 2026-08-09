@@ -8,6 +8,7 @@
  */
 
 #include "dictionary.h"
+#include "input.h"
 
 #include <ctype.h>
 #include <stdint.h>
@@ -16,6 +17,12 @@
 
 /* Printed in place of a field that was never filled in. */
 #define MISSING_FIELD_TEXT "(none)"
+
+/* How many words are shown before the listing stops and waits. */
+#define ENTRIES_PER_PAGE 20
+
+/* The pause only waits for Enter, so a tiny buffer is enough. */
+#define PAUSE_BUFFER_SIZE 8
 
 /*
  * Returns the text of a field, or a placeholder when the field is NULL.
@@ -260,6 +267,28 @@ static void printEntryLine(size_t position, const DictionaryEntry *entry)
 }
 
 /*
+ * Holds the listing until the user presses Enter.
+ *
+ * readLine is reused here instead of getchar so that a user who types a
+ * whole word before pressing Enter cannot leave the rest of that line in
+ * stdin for the menu to read as a command. The buffer is a local array, so
+ * nothing is allocated or freed. A closed input stream simply carries on
+ * printing rather than looping.
+ */
+static void waitForEnter(void)
+{
+    char buffer[PAUSE_BUFFER_SIZE] = {0};
+
+    printf("Press Enter to continue...");
+
+    /* The prompt has no newline, so push it to the screen before waiting. */
+    fflush(stdout);
+
+    /* The result does not matter: end of input just means do not pause. */
+    (void)readLine(buffer, sizeof(buffer));
+}
+
+/*
  * Stores a pointer to every entry in the table in the caller's array.
  *
  * Only the pointers are copied. Copying the entries themselves would mean
@@ -322,6 +351,7 @@ void displayDictionaryAlphabetically(const Dictionary *dictionary)
     size_t entryCount = 0;
     size_t stored = 0;
     size_t index = 0;
+    size_t printedOnPage = 0;
 
     /* Never follow the pointer before checking that it is real. */
     if (dictionary == NULL)
@@ -386,6 +416,14 @@ void displayDictionaryAlphabetically(const Dictionary *dictionary)
     for (index = 0; index < stored; index = index + 1)
     {
         printEntryLine(index + 1, entries[index]);
+        printedOnPage = printedOnPage + 1;
+
+        /* Pause once a page is full, but never after the very last word. */
+        if (printedOnPage == ENTRIES_PER_PAGE && (index + 1) < stored)
+        {
+            printedOnPage = 0;
+            waitForEnter();
+        }
     }
 
     printf("=====================================\n");
