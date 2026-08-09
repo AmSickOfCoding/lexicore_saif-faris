@@ -83,3 +83,11 @@ Both branches modified adjacent sections of `docs/design.md` simultaneously, res
    * Section 2: File loader pipeline and statistics tracking (Trainee B).
 3. **Marker Cleanup:** Explicitly removed all Git conflict delimiters (`<<<<<<< HEAD`, `=======`, and `>>>>>>> origin/...`).
 4. **Validation:** Confirmed clean markdown formatting and committed the unified resolution to `main`.
+
+---
+
+## 4. Load Factor & Performance Optimization
+
+* **Optimal Load Factor ($\alpha$):** Maintained at $\alpha \le 0.75$ ($\alpha = \frac{\text{entryCount}}{\text{bucketCount}}$) to preserve $\mathcal{O}(1)$ average time complexity.
+* **Collision Mitigation:** The combination of the DJB2 multiplier constant `33` and prime bucket counts minimizes clustering and guarantees uniform distribution across textual keys.
+* **Cache Locality:** Head prepending avoids chain traversals during insertion, while pointer-based walking ensures minimal overhead during lookups.
