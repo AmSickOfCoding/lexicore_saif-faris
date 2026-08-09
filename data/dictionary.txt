@@ -1,0 +1,67 @@
+anchor|noun|A heavy object dropped from a boat to hold it in one place.|The crew lowered the anchor in the shallow bay.
+boldly|adverb|In a brave and confident way.|She boldly asked for a place on the team.
+brittle|adjective|Hard but easy to snap or break.|The old rubber seal had gone brittle with age.
+canyon|noun|A deep valley with steep sides and often a river at the bottom.|The path runs along the rim of the canyon.
+cheerful|adjective|Happy and pleasant to be around.|The nurse had a cheerful word for every patient.
+combine|verb|To join two or more things together so they form one thing.|We combine the flour and the eggs before adding the milk.
+comfort|noun|A feeling of ease and freedom from worry or pain.|The warm blanket was a comfort on the cold night.
+commit|verb|To promise your time or effort to something.|He decided to commit two evenings a week to the project.
+common|adjective|Happening often or found in many places.|Heavy rain is common here in the autumn.
+compare|verb|To look at two things to see how they are alike or different.|Compare the two designs before you choose one.
+complete|adjective|Having every part that is needed, with nothing missing.|The set is complete now that the last piece has arrived.
+completely|adverb|In every way, with nothing left out.|The room went completely dark when the power failed.
+compute|verb|To work out an amount or an answer using numbers.|The program will compute the total cost of each order.
+conclude|verb|To decide something after thinking about the facts.|We can conclude from these results that the change worked.
+concern|noun|A feeling of worry about something important.|Her main concern was the safety of the students.
+confident|adjective|Sure that you are able to do something well.|She felt confident as she walked into the interview.
+connect|verb|To join one thing to another so that they work together.|Connect the printer to the computer with this cable.
+console|verb|To comfort someone who is sad or disappointed.|He tried to console his friend after the bad news.
+constant|adjective|Staying the same, or happening all the time.|The engine runs best at a constant speed.
+constantly|adverb|All the time, without stopping.|The phone rang constantly all morning.
+contain|verb|To hold something inside.|Each box can contain up to twenty books.
+fragile|adjective|Easily broken or damaged.|Pack the fragile glasses in plenty of paper.
+gather|verb|To bring things together into one place.|We gather the fallen apples every autumn.
+gently|adverb|In a soft and careful way.|He gently lifted the sleeping child onto the bed.
+harbor|noun|A sheltered stretch of water where ships can stay safely.|Three fishing boats came into the harbor at dawn.
+hesitate|verb|To pause before doing something because you are unsure.|Do not hesitate to ask if the form confuses you.
+humble|adjective|Not proud, and not boastful about what you can do.|He stayed humble even after winning the prize.
+lantern|noun|A lamp inside a cover that protects the flame or bulb.|A lantern hung by the door of the barn.
+meadow|noun|A field covered with grass and wild flowers.|Bees moved across the meadow all afternoon.
+mend|verb|To repair something that is broken or torn.|She sat by the window to mend the torn sleeve.
+narrow|adjective|Small in width from one side to the other.|The lane is too narrow for two cars to pass.
+navigate|verb|To find the way from one place to another.|Sailors once used the stars to navigate at night.
+orchard|noun|A piece of land where fruit trees are grown.|The orchard behind the house is full of pears.
+pebble|noun|A small smooth stone.|He picked up a flat pebble and skimmed it across the water.
+polish|verb|To rub a surface until it shines.|He stopped to polish his shoes before the meeting.
+process|verb|To deal with something through a series of steps.|The office will process your application this week.
+processor|noun|The part of a computer that carries out instructions.|This laptop has a faster processor than the old one.
+program|noun|A set of instructions that tells a computer what to do.|She wrote a program to sort the results.
+progress|noun|Movement forward towards a goal.|The builders made good progress during the dry weather.
+prolong|verb|To make something last longer than it otherwise would.|Regular servicing will prolong the life of the machine.
+prompt|adjective|Done quickly and without delay.|Thank you for your prompt reply to my letter.
+promptly|adverb|Without any delay.|She answered every message promptly.
+protect|verb|To keep someone or something safe from harm.|A helmet will protect your head if you fall.
+quietly|adverb|Without making much noise.|They spoke quietly so the baby would not wake.
+recently|adverb|At a time not long ago.|We recently moved into a smaller office.
+record|noun|A written note of something kept so it can be checked later.|The nurse kept a record of every visit.
+reduce|verb|To make something smaller in size or amount.|Turning off the lights will reduce the bill.
+reliable|adjective|Able to be trusted to work or behave as expected.|The old van is still reliable in bad weather.
+remember|verb|To keep something in your mind and be able to think of it again.|I cannot remember where I left my keys.
+restore|verb|To bring something back to the state it was in before.|They plan to restore the old station building.
+retreat|noun|A quiet place where someone can rest away from others.|The cabin by the lake was his weekend retreat.
+reveal|verb|To make known something that was hidden.|He would not reveal the name of the winner.
+ribbon|noun|A long narrow strip of cloth used for tying or decorating.|She tied a red ribbon around the parcel.
+scatter|verb|To throw or drop things over a wide area.|Scatter the seed evenly across the bed.
+seldom|adverb|Not often.|He seldom leaves the house before nine.
+stream|noun|A small narrow river.|The children waded across the shallow stream.
+strength|noun|The quality of being physically strong.|She slowly built up her strength after the illness.
+stretch|verb|To make something longer or wider by pulling it.|Stretch the canvas tightly over the frame.
+strict|adjective|Expecting rules to be obeyed exactly.|Our teacher is strict about handing work in on time.
+strictly|adverb|In a way that must be obeyed exactly.|Smoking is strictly forbidden inside the building.
+stroll|verb|To walk in a slow and relaxed way.|They like to stroll along the river after dinner.
+strong|adjective|Having a lot of power or force.|A strong wind blew the garden fence over.
+structure|noun|The way the parts of something are put together.|The bridge has a simple steel structure.
+vessel|noun|A ship or large boat.|A supply vessel docked just before the storm.
+vivid|adjective|Very bright, or very clear in the mind.|She still has a vivid memory of that morning.
+whisper|verb|To speak very quietly using breath instead of the voice.|He leaned across the desk to whisper the answer.
+wisdom|noun|Good sense that comes from knowledge and experience.|Her grandmother's wisdom settled the argument.
