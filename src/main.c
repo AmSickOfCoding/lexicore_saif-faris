@@ -13,6 +13,7 @@
 #include "statistics.h"
 
 #include <stdio.h>
+#include <string.h>
 
 /* A prime bucket count spreads the words evenly across the table. */
 #define BUCKET_COUNT 503
@@ -47,6 +48,9 @@
 
 /* A definition or an example sentence, which can be a long line. */
 #define TEXT_BUFFER_SIZE 1024
+
+/* A path typed at the load or save prompt. */
+#define PATH_BUFFER_SIZE 512
 
 /* The three results addWord can give back. */
 #define ADD_WORD_SUCCESS 1
@@ -378,6 +382,94 @@ static void handlePrefixSearch(const Dictionary *dictionary)
 }
 
 /*
+ * Asks which file to use, offering the usual one when Enter is pressed.
+ *
+ * Returns 1 when the buffer holds a usable filename. The buffer belongs to
+ * the caller. An empty answer is not an error here: it means "the usual
+ * file", which is copied in with strncpy and terminated by hand.
+ */
+static int promptForFilename(char *buffer, size_t bufferSize)
+{
+    /* Check the buffer before writing anything into it. */
+    if (buffer == NULL || bufferSize == 0)
+    {
+        return 0;
+    }
+
+    printf("Enter the filename, or press Enter for '%s': ", DEFAULT_DICTIONARY_FILE);
+    fflush(stdout);
+
+    if (readLine(buffer, bufferSize) == 0)
+    {
+        printf("Nothing was entered.\n");
+        return 0;
+    }
+
+    /* An empty answer means the default file rather than a mistake. */
+    if (isBlank(buffer) == 1)
+    {
+        strncpy(buffer, DEFAULT_DICTIONARY_FILE, bufferSize - 1);
+        buffer[bufferSize - 1] = '\0';
+    }
+
+    return 1;
+}
+
+/*
+ * Menu option 8: reads a file and adds its words to the ones in memory.
+ *
+ * Returns 1 when the load worked, because words read from a file have not
+ * been saved to whatever file the user might write next. Loading adds to
+ * the table rather than replacing it, and any word already there is kept.
+ * The entries belong to the dictionary; this function allocates nothing.
+ */
+static int handleLoad(Dictionary *dictionary)
+{
+    char filename[PATH_BUFFER_SIZE] = {0};
+
+    if (promptForFilename(filename, sizeof(filename)) == 0)
+    {
+        return 0;
+    }
+
+    printf("Words already in memory are kept, and duplicates are skipped.\n");
+
+    /* loadDictionaryFromFile prints its own summary of what it read. */
+    if (loadDictionaryFromFile(dictionary, filename) != FILE_OPERATION_SUCCESS)
+    {
+        printf("Nothing was loaded. The dictionary is unchanged.\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+/*
+ * Menu option 9: writes every word to a file.
+ *
+ * Returns 1 when the file was written, which is what lets the menu forget
+ * about unsaved changes. saveDictionaryToFile asks before overwriting a
+ * file that already exists and prints its own messages.
+ */
+static int handleSave(const Dictionary *dictionary)
+{
+    char filename[PATH_BUFFER_SIZE] = {0};
+
+    if (promptForFilename(filename, sizeof(filename)) == 0)
+    {
+        return 0;
+    }
+
+    if (saveDictionaryToFile(dictionary, filename) != FILE_OPERATION_SUCCESS)
+    {
+        printf("The dictionary was not saved.\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+/*
  * Creates the dictionary, runs the menu until the user leaves, and frees
  * everything on the way out.
  *
@@ -456,6 +548,21 @@ int main(void)
 
             case MENU_STATISTICS:
                 displayStatistics(dictionary);
+                break;
+
+            case MENU_LOAD:
+                if (handleLoad(dictionary) == 1)
+                {
+                    modified = 1;
+                }
+                break;
+
+            /* A successful save is the one thing that clears the flag. */
+            case MENU_SAVE:
+                if (handleSave(dictionary) == 1)
+                {
+                    modified = 0;
+                }
                 break;
 
             case MENU_HELP:
