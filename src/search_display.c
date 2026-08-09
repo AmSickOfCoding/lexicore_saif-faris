@@ -291,6 +291,9 @@ static void waitForEnter(void)
 
     /* The result does not matter: end of input just means do not pause. */
     (void)readLine(buffer, sizeof(buffer));
+
+    /* Separate the prompt from the page that follows it. */
+    printf("\n");
 }
 
 /*
