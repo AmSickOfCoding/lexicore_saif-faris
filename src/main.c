@@ -42,6 +42,9 @@
 /* Room for a short yes or no answer. */
 #define ANSWER_BUFFER_SIZE 16
 
+/* One word or one prefix, with plenty of room to spare. */
+#define WORD_BUFFER_SIZE 256
+
 /*
  * Returns 1 once stdin has nothing left to give.
  *
@@ -146,6 +149,108 @@ static int askYesNo(const char *question)
 }
 
 /*
+ * Prints a prompt and reads one line of text into the caller's buffer.
+ *
+ * Returns 1 when real text was typed and 0 when the line could not be read
+ * or held nothing but spaces, printing a message in that case. The buffer
+ * belongs to the caller and is never allocated or freed here. Every text
+ * prompt in this file goes through here, so no empty field can reach the
+ * dictionary functions.
+ */
+static int promptForText(const char *prompt, char *buffer, size_t bufferSize)
+{
+    /* Check the pointers before either of them is used. */
+    if (prompt == NULL || buffer == NULL || bufferSize == 0)
+    {
+        return 0;
+    }
+
+    printf("%s", prompt);
+    fflush(stdout);
+
+    if (readLine(buffer, bufferSize) == 0)
+    {
+        printf("Nothing was entered.\n");
+        return 0;
+    }
+
+    if (isBlank(buffer) == 1)
+    {
+        printf("That cannot be left empty. Nothing was done.\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+/*
+ * Prints all four fields of one entry.
+ *
+ * The entry is only read, never changed or freed; it stays owned by the
+ * dictionary. A field that was never filled in prints as an empty line
+ * rather than being handed to printf as a NULL pointer.
+ */
+static void printEntryDetails(const DictionaryEntry *entry)
+{
+    /* Never follow the pointer before checking that it is real. */
+    if (entry == NULL)
+    {
+        return;
+    }
+
+    printf("\nWord:            %s\n", entry->word != NULL ? entry->word : "");
+    printf("Part of speech:  %s\n", entry->partOfSpeech != NULL ? entry->partOfSpeech : "");
+    printf("Definition:      %s\n", entry->definition != NULL ? entry->definition : "");
+    printf("Example:         %s\n", entry->exampleSentence != NULL ? entry->exampleSentence : "");
+}
+
+/*
+ * Menu option 1: looks one word up and prints it.
+ *
+ * findWord hands back a pointer to an entry the dictionary still owns, so
+ * the result is only read here and must never be freed.
+ */
+static void handleSearch(const Dictionary *dictionary)
+{
+    char word[WORD_BUFFER_SIZE] = {0};
+    DictionaryEntry *found = NULL;
+
+    if (promptForText("Enter the word to search for: ", word, sizeof(word)) == 0)
+    {
+        return;
+    }
+
+    /* The returned entry is borrowed from the dictionary, never freed here. */
+    found = findWord(dictionary, word);
+    if (found == NULL)
+    {
+        printf("'%s' is not in the dictionary.\n", word);
+        return;
+    }
+
+    printEntryDetails(found);
+}
+
+/*
+ * Menu option 5: lists every word starting with the letters the user types.
+ *
+ * findWordsByPrefix prints the matches and the total itself, so there is
+ * nothing left to report here.
+ */
+static void handlePrefixSearch(const Dictionary *dictionary)
+{
+    char prefix[WORD_BUFFER_SIZE] = {0};
+
+    if (promptForText("Enter prefix: ", prefix, sizeof(prefix)) == 0)
+    {
+        return;
+    }
+
+    /* The count is already printed by the function, so it is not needed here. */
+    (void)findWordsByPrefix(dictionary, prefix);
+}
+
+/*
  * Creates the dictionary, runs the menu until the user leaves, and frees
  * everything on the way out.
  *
@@ -188,6 +293,14 @@ int main(void)
 
         switch (choice)
         {
+            case MENU_SEARCH:
+                handleSearch(dictionary);
+                break;
+
+            case MENU_PREFIX:
+                handlePrefixSearch(dictionary);
+                break;
+
             case MENU_DISPLAY_ALL:
                 displayDictionaryAlphabetically(dictionary);
                 break;
