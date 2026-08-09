@@ -213,3 +213,85 @@ int addWord(Dictionary *dictionary, const char *word, const char *partOfSpeech,
     dictionary->entryCount++;
     return 1;
 }
+
+/*
+ * Updates a word's metadata. Safely allocates the new string before
+ * freeing the existing one to protect against allocation failures.
+ * Returns:
+ *   1  : Success
+ *   0  : Word not found or update cancelled
+ *  -1  : Memory allocation failure or invalid input
+ */
+int updateWord(Dictionary *dictionary, const char *word)
+{
+    if (dictionary == NULL || word == NULL)
+    {
+        printf("Error: Invalid dictionary or word parameter.\n");
+        return -1;
+    }
+
+    DictionaryEntry *entry = findWord(dictionary, word);
+    if (entry == NULL)
+    {
+        printf("Word '%s' not found in dictionary.\n", word);
+        return 0;
+    }
+
+    printf("\n=== Current Word Entry ===\n");
+    printf("Word: %s\n", entry->word != NULL ? entry->word : "");
+    printf("Part of Speech: %s\n", entry->partOfSpeech != NULL ? entry->partOfSpeech : "");
+    printf("Definition: %s\n", entry->definition != NULL ? entry->definition : "");
+    printf("Example Sentence: %s\n", entry->exampleSentence != NULL ? entry->exampleSentence : "");
+
+    printf("\nSelect field to update:\n");
+    printf("1. Part of Speech\n");
+    printf("2. Definition\n");
+    printf("3. Example Sentence\n");
+    printf("4. Cancel\n");
+    printf("Enter choice (1-4): ");
+
+    int choice = readMenuChoice();
+    if (choice < 1 || choice > 3)
+    {
+        printf("Update cancelled.\n");
+        return 0;
+    }
+
+    char inputBuffer[1024] = {0};
+    printf("Enter new value: ");
+    if (!readLine(inputBuffer, sizeof(inputBuffer)) || isBlank(inputBuffer))
+    {
+        printf("Error: New field value cannot be empty.\n");
+        return -1;
+    }
+
+    /* Allocate new string BEFORE freeing old one to safeguard existing data */
+    char *newVal = duplicateString(inputBuffer);
+    if (newVal == NULL)
+    {
+        printf("Error: Memory allocation failed during update. Existing data preserved.\n");
+        return -1;
+    }
+
+    switch (choice)
+    {
+        case 1:
+            free(entry->partOfSpeech);
+            entry->partOfSpeech = newVal;
+            break;
+        case 2:
+            free(entry->definition);
+            entry->definition = newVal;
+            break;
+        case 3:
+            free(entry->exampleSentence);
+            entry->exampleSentence = newVal;
+            break;
+        default:
+            free(newVal);
+            return 0;
+    }
+
+    printf("Word '%s' updated successfully.\n", entry->word);
+    return 1;
+}
